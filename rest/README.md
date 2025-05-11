@@ -25,7 +25,7 @@ berisi **password** untuk koneksi ke database.
 
 **Contoh** :
 
-> *PGHOST=172.28.108.100*
+> *PGHOST=1.2.3.4*
 
 > *PGPORT=5432*
 
@@ -85,7 +85,7 @@ Method-method yang diperbolehkan untuk mengakses rest api.
 
 **Contoh** :
 
-> *CORS_ORIGIN=["http://172.28.108.97:3242", "http://rusunawa.bpjsketenagakerjaan.go.id"]*
+> *CORS_ORIGIN=["http://1.2.3.4:3242", "http://subdomain.domain.com"]*
 
 > *CORS_METHODS=GET,HEAD,POST,DELETE,PUT*
 
@@ -110,7 +110,7 @@ Berisi **kode kantor** yang digunakan untuk penamaan file pada ceph.
 
 **Contoh** :
 
-> *CEPH_URL=http://172.28.108.208:2024*
+> *CEPH_URL=http://3.1.53.5:2024*
 
 > *CEPH_POST=put-object*
 
@@ -137,7 +137,7 @@ Berisi **alamat direktory path** untuk pengecekan kpj/ identitas.
 
 **Contoh** :
 
-> *WS_URL=http://172.28.108.34:7003*
+> *WS_URL=http://23.25.12.45:7003*
 
 > *WS_NPP=/perusahaan/getInformationByNpp*
 
