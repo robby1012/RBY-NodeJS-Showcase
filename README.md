@@ -4,6 +4,9 @@
 Part of Job Requirement (need tho showcase my project).
 
 
+![Alt text](rusunawa.png)
+
+
 This is RUSUNAWA project while I work at BPJSTK.
 
 I'm responsible for development backend side using NodeJS.
