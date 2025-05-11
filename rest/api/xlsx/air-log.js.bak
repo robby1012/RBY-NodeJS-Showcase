@@ -1,0 +1,73 @@
+require('core-js/modules/es.promise')
+require('core-js/modules/es.string.includes')
+require('core-js/modules/es.object.assign')
+require('core-js/modules/es.object.keys')
+require('core-js/modules/es.symbol')
+require('core-js/modules/es.symbol.async-iterator')
+require('regenerator-runtime/runtime')
+
+const Excel = require('exceljs/dist/es5')
+const moment = require('moment')
+// const fs = require('fs')
+module.exports = async (res, reqData, rowData, tipe = 'os') => {
+  console.log(rowData)
+  var workbook = new Excel.Workbook()
+
+  await workbook.xlsx.readFile(__dirname + '/template_files/air-log.xlsx')
+  const worksheet = workbook.getWorksheet('UPLOAD')
+  // const row = worksheet.getRow(6);
+  console.log('datanya', reqData)
+  if (rowData.ret === 0) {
+    let nrow = 2
+    for (var i = 0; i < rowData.data.length; i++) {
+      nrow += 1
+      console.log(nrow)
+      worksheet.getCell(`A${nrow}`).value = i + 1
+      worksheet.getCell(`B${nrow}`).value = rowData.data[i].id_unit
+      worksheet.getCell(`C${nrow}`).value = rowData.data[i].nama_blok
+      worksheet.getCell(`D${nrow}`).value = rowData.data[i].nama_lantai
+      worksheet.getCell(`E${nrow}`).value = rowData.data[i].nama_unit
+      worksheet.getCell(`F${nrow}`).value = rowData.data[i].tgl_end_meter_lalu
+        ? moment(rowData.data[i].tgl_end_meter_lalu).format('YYYY-MM-DD')
+        : null
+      // worksheet.getCell(`G${nrow}`).value = rowData.data[i].tgl_end_meter_lalu
+      worksheet.getCell(`H${nrow}`).value = rowData.data[i].meter_end_lalu
+      // worksheet.getCell(`I${nrow}`).value = rowData.data[i].meter_end_lalu
+      // worksheet.getCell(`J${nrow}`).value = rowData.data[i].meter_pemakaian_lalu
+      worksheet.getCell(`K${nrow}`).value = reqData.p_tgl_pencatatan
+      worksheet.getCell(`L${nrow}`).value = ''
+      worksheet.getCell(`M${nrow}`).value = rowData.data[i].tgl_pencatatan_lalu
+        ? moment(rowData.data[i].tgl_pencatatan_lalu).format('YYYY-MM-DD')
+        : null
+      worksheet.getCell(`N${nrow}`).value =
+        rowData.data[i].petugas_pencatat_lalu
+
+      /* worksheet.getCell(`A${nrow}`).value = rowData.data[i].kode_jenis_kelamin
+      worksheet.getCell(`B${nrow}`).value = rowData.data[i].nama_jenis_kelamin
+      worksheet.getCell(`D${nrow}`).value = { formula: `=A${nrow}` }
+      worksheet.getCell(`E${nrow}`).value = { formula: `=B${nrow}` } */
+    }
+  }
+  if (tipe === 'os') {
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=' + 'customer.xlsx'
+    )
+    await workbook.xlsx.write(res)
+    res.end()
+  } else {
+    var file = await workbook.xlsx.writeBuffer()
+    'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+      file.toString('base64')
+    res.status(200).json({
+      ret: 0,
+      file:
+        'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+        file.toString('base64')
+    })
+  }
+}

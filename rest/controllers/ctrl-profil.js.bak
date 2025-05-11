@@ -1,0 +1,19 @@
+const apiReq = require('./api-caller')
+
+const reqCtrl = {
+  getProfilKpj: {
+    params: (req) => {
+      return {
+        p_kpj: req.query.p_kpj ? req.query.p_kpj.trim() : ''
+      }
+    },
+    rules: {
+      p_kpj: { required: true }
+    },
+    request: 'getProfilKpj'
+  }
+}
+
+exports.methodGet = {
+  'tenant/profil/kpj': (req, res) => apiReq.getData(req, res, reqCtrl.getProfilKpj)
+}

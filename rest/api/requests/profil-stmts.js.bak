@@ -1,0 +1,11 @@
+// const moment = require('moment')
+module.exports = {
+  getProfilKpj: {
+    text: `	select *
+						from profil_penghuni profil
+						where kpj=$1
+						order by id_profil_penghuni desc
+						limit 1`,
+    params: ['p_kpj']
+  }
+}

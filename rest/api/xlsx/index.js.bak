@@ -1,0 +1,45 @@
+const rpts = {
+  ...require('./kontrak'),
+  /* ...require('./template-upload-xlsx'), */
+  'air-log': require('./air-log')
+}
+async function getFile(dataExcel) {
+  buf = await dataExcel.xlsx.writeBuffer()
+  return buf
+}
+module.exports.createXlsx = function (kodeReport, data, callback) {
+  if (typeof rpts[kodeReport] === 'undefined') {
+    throw 'Report tidak ditemukan'
+  }
+  const dataExcel = rpts[kodeReport](data)
+  var call = getFile(dataExcel)
+  call.then(
+    function (val) {
+      var file =
+        'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+        val.toString('base64')
+      callback(file)
+    },
+    function (er) {
+      console.log(er)
+    }
+  )
+}
+
+const generatorXLSX = {
+  'air-log': require('./air-log')
+}
+
+module.exports.generateXLSX = function (
+  res,
+  generatorName,
+  reqParams,
+  rowData,
+  tipe = 'os'
+) {
+  if (typeof generatorXLSX[generatorName] === 'undefined') {
+    // eslint-disable-next-line no-throw-literal
+    throw 'Generator tidak ditemukan'
+  }
+  return generatorXLSX[generatorName](res, reqParams, rowData, tipe)
+}

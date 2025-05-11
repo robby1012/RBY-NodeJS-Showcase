@@ -1,0 +1,790 @@
+require('core-js/modules/es.promise')
+require('core-js/modules/es.string.includes')
+require('core-js/modules/es.object.assign')
+require('core-js/modules/es.object.keys')
+require('core-js/modules/es.symbol')
+require('core-js/modules/es.symbol.async-iterator')
+require('regenerator-runtime/runtime')
+var Excel = require('exceljs/dist/es5')
+module.exports = function (data) {
+  var workbook = new Excel.Workbook()
+  workbook.creator = 'BPJS Ketenagakerjaan'
+  workbook.lastModifiedBy = 'BPJS Ketenagakerjaan'
+  workbook.created = new Date()
+  var rekapAsetTetapGuna = workbook.addWorksheet('REKAP KAP GUNA', {
+    properties: {
+      tabColor: {
+        argb: 'FF00FF00'
+      }
+    }
+  })
+
+  rekapAsetTetapGuna.mergeCells('A1:E5')
+  rekapAsetTetapGuna.mergeCells('A6:E6')
+  rekapAsetTetapGuna.getCell('A1').border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' }
+  }
+  var myBase64Image =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAAA8CAYAAACAVsR+AAAABmJLR0QA/wD/AP+gvaeTAAAVnUlEQVR42u1dC5hUVR0fs3z20NQeZgYzC2j4SAkXWDE0E3YXSPzEB1lhD7PAVylqaZAlH5WFmqb4yDTRHOcObDuzLFby+aoQhNCWfdx7Z3ZdRDCQ5CUsy27//zl3Zs6595x777x27y7n/33ng537Oufc8/+d//uGQoOQmtOR761Ph28WtZbU0NNCihQpOnAIACENrVfYUpFr1AwpUnRgAUKrDBBa0pFr1QwpUnRgAcJ/FCAoUqQoAwhr5IAQvk7NkCJFBxIgtEdWyQBhfbriBjVDihQplcEChPD1aoYUKQo4nbb8giNH1U859uxEbRhbZaJ2VOb/E5ZceFR+gBBOSb0M6chMNduKFAWAkLnHNFRPGZeovXlsQ/UfxyZrXhyXrGmFf3dC63Vpb4fmzftAHhLC23K3Y8UU9SYUKeoHAkY+dUyy5gb4V4O2yYPpXdu4ZZNG+30ueBK2SY2KHZEq9WYUKeoL6g0dVJWoHQ8MfDe0VDEAYG8gWfzYTxeamkYeAozfIwWE1NAR6kUpUlRGqqyb+klg2DmW+N9bprbUFyCY4RNd7Ae9ra3Dj1VvTJGiMtCYZZOGgEpwPzDr+2UEAqoyJGve9AUI6WGVLoCwt7c3dHCfqUwN1bcDUC5wbcmauWBTuWLc8gs+4XYvGP85bveBe9w5NlF749j6ydMQoAvt8+jlF3xWcP+v+VgHc6E9b0mGm6E1QXsC+zNhxYQPKm4ZxISLFxbow/DCu8oNBGwDL8QRXn1rbg9f5AIITX06T8ma/+Yxvj3AUPeMjU4/XGKPuSmPe+2H9he04eQN8smaSsf9Gmqiwj5BXy31sNujP03j6iePVZwzyAiRHl7uddC29SUQZFrVskme+j+4HG9xAQQtwIBAbSWwy46MTj+kSEDIggxIDpeVAxAQDCyJwD/gJWovUlw0WOwE9ZOHwUtd2R9AkGWW+skTvAEh8rhLpuOdQQcEy4A6p0SAgK0LYzpKDQgwtl8W0JfdlcsmqfTzAa8iJGuuBP10R3+CAbEjJGprfQDCq1JAaA/P6GdA2Ad2hUWZBswXw53TMdZErV5CQMC2vJSAUNlQ/VFh7AicN66h+mK4xyXQ/kDGK5CAFEcNVIJgIFi4v+5vIMgCAiw2t+6uAJUGVIadUpdj+4ihruONp74Sihs3lhEQdkoYsMd2Xg+oZ4f5AIRZ2eONEz8O7+pL8NsrgvO68XipAMF6jv0Za9HtbDvvQsuewZ73BgSoHa2Ya4DRqNWjPoQLIShgYInSrlGGzR2RUS72g7c8B62Z14c0ozcUN38T6u09qC8AwWL2jY7z7MzlAQgZQmaD33cJ5q6qZICQqJ0o6MumqrqpxzvGlqh9FI4thvvOFB1XNFAkg2TNU0ECA2JUTNSe6woIqchsF3XhWc9xx4x7CCBgw//3hYQAdhGBhLDUp8owSwIwTYWoW34BAUPQJe9oK4z5NnRdKiYaRAQv9r6ggQFdmNVnuNsPKhZLsxzbK2b5kBD+kgUE2n5UThsC/N0g0LO3A/OeUiggnF0/5UT4fa9Ad68sqZchWfOCq9uzoboRVTwVgzDACQ1CgQQDaG5ZjxBw9AFg/M1ylWHIEG9AMDptgLCf2BX6zsuQljGuEBAStT9ls0OBCb+FBkmRyw8Y88MlBYT6KSfB87b4GFMn3POHChgGIFmi4PaAAsJWt75D4ZMxLlWS1noOPtr6GRsYZNrG0JL0UX0ECKg6aGfFpx1TYi/DM6X0MrDrxW8sAszFapHkoyjABCJeXVClAxRR3fre0h65Q+5diNzhLR3oF0sAAZp5fx8BQqatse/oRQDC/+C9RsoBCFQ0Cx2E4ckgLazw0Zd3qxonjlScNgAIDXYBBgNs893tB5EmaUJTeshJPtSFe+WAAKpDLH1SCQBhd0bEx4aRl/DbDGgdAp1/brGAQJ4PLsK87EfLJn3Z0ZdE7UN+rj0rWTMcVJY7UPVx6deritsGhiHx70EGBDeXY6sZHi03JkZe8hw8uhg1o8MFEMAVqT9aDi+DBcbjBWPeUAQgYGj53aOTNZ8qYB3MyguMwSM1vqH6OLvUAFLJeXDd6xKg+oLiuODbDnoCDAi7scSaVDpIhe8rqmTaEmOUKxjQticUNT9WDkBA9UA0bjaARwIIT4FefhU22Jm/jbkCGBo8PTpdmtGJUon0OIr/yZp/CaSVS2zj+hw+D/79szXGtCj/ApPRsNqVoN8zFNcFWToAa3XA1QVpLYTVG48/Aph+iwQM3l236bQjvdUFc74PQICmf70cgCDx7HDRivnEIbCEqdDIgFYocSf1TlQvdIAC7uqYQi2IcsRal5nTkPHht3cEu/5jjjJ3NJ4lLVBBVJJTwAHhbwEHhMul3gWIL5BLBxXzPAe/aPWHiCfBDyDEzT8VCQh7YK6nZxuMywoN3yUY8xs+VIZZPt7to5I5XYf1GkC0/y5Wo4L/vyY5b7FgXLdJzl2J2ZVoOMT6DShBiIAOJVLFdQEl3CmCkLjk0jaJxFGq+ocOhm8w6GIwCO/0VR1JMy71Jx2Qtr6PvAy4415bCkAY3zjx01bBkvz7AesCs1wFKs5hcLy5wHE9p7guwITFToIsHcAO9gtZ31tSFdNdjIm/8jUBcWNFHoCwL58ch4IBAVx4mEtSCkAg/YDiJHDue3n2Y5+baE88CvkCDQQyiQBGUYAIXvrJgQUE2KFkpcUws3F9OrJeoipsbd5w0jE+pIOqPMCAtif1j5YRELqxEpXIgFoMIJDrIbIQg4N89mOjV94IY4xe5fOezWfXTz5dcVzQPQzwkgaidOBmO4DIxKt9DV4zX8gbEKL6cfnYZkiEnktDaQB0+KcxvNdNt4Zzv+64FuwQeb1sMPKRegWJ2qRATewC/f8lVFX8lKrjVE5qtHxeUFsTaz28CMe+Y0/nVhRQwpTUgALCZlnuwtr0kKOA8TdJAGGdr0KqcWNS3mCAAUrR3oMHw3tHRkb3IcYEYHZiKRgW1RwsuIpJaHhvme1HUYDJqpO4P4CAIPVVgyHxIUmJtH1Yddlz0NGmQwAQmgoAhP+qFaNo8BsWy/s9hUKMao1SMEhXfEn+IZbwXJ+qwtwCwABbo1otigY9Baz+wTuyyjotLSM+InMzQrbjyhV+UmwxJwGjDgsBhJj5U7VaBiAlOo4m0ajYCshJKQmh7Snbh1SwC82CkWlqQMBgP5bnkvUTvtn4Z4ndYEtbx3DvYJfH0ocBY79WoHQAgKCfkdfEYik2zVhEWtwc7lwkkHIdMx7InWN8V3FvGSimX8Jkrv6rX/oQN69m1tKGQM9XdUP1oSCmvxUAQLhV1kfwKvxAZjeA9Obz/KkKxoMFg4FmrMp7YtHmkEuO4rMOscaCpv+bKdn2eijefEwRC24509erFAooQChWbbipX12M4H+XgkFq2DnA/HskgDDb56K4oggwwDazZIBQv/EI+O1l5t6toWj6U0UuOAUIQQYEre2crCSoGb8M/JyRWvv+SmKVPrUZvk8gK7HV1j7sZExSEscbVCzM42W8XzgYwE5eiLtRBAjo4UDjZO7+RqiuRV6NOG6cQsAsbnwj9KwxLjSv15ZABH/TbM1/5p5l/CKrr9oJIy1jbZUgkXyT3Femz9a3HpvTeU0aXajpJwBDzSBJXtEWeUl7DN6i/Z4I19aA/vx5zwhPPB/HSPpk6flx4xPZPizRnUVeok0fhvNHkjJ3mllLxmKfHy9AwHFknwENc1tYWmp8FvpxGQDulXDt+aEG/VBnP2BtsPfAv1es+CBxbeM7s9sx4m0nO+6B5+M8P5saD/M7lVwX7TxcOl8kZT/1OXIeOV+fIM3GxXnJ9g3mDOcobpwH130HrruArEmJlDCjP8DAHqabodbO4Z8Bxm8Xf9Y9fH+vrVS5dKFpxrYiJIOe0LPmlwvbFWyAgAtFM6PMvd+UMhYygDhwqg0W59kcU7j1neuPPkbibv2nw8aBUkYuqWs5MNUP4f9dzDXdACo/cTCPZiyznZeTgjTDGf2otX8a+vWcoEoVztNtjEqlcWClGXUS43Aa+jrFFyAgMGrmTubaO3iVzniazKHd9RwzL3eqf5zxeRhRAen/77Pmnq3I9ZrA1rRFMJbtZI7tIBczZsOxdsH5XUQCQQmUf5cbmM3iMvh3DZ+0Z7RI1yHW9OtDQHhcJhnoesUJwPhtEiPig1hU1VtUhBfDTkYhLW7cXbiYaAMEzXiYufcmqcWbMtYml37tggV2Zl6AQBa/sdvl3I2c2sICQsx4Tw6W1g5I+gI7mmbscHnG+0Ra4FWn/7jWoBABAgFW1/nZR8brBggoWWj6VkYKXGjr1xrXecWkOBkgsBKgL0AwnvLIsr3ZBuy3eki0i6WAIH+XfxWuRax+A4xqlhkIerAGQ0iywxMwkLgXQU1Y4EsyQDFJM94u0m7wqlScyhcQHLs9iJ/S67hy8M+Txb2k7Qs26eLlrAqCCwYlB5Z58LfMQiIMpDdzadzx1OkAUmPh71eYey4SAgJd2GvJju1YvOZ82+6FXpMn6EdvQLUgMR8s4xk5W1Fcv4FnMv33RBpD8V8zEvzzDc3GRL8iOzi5Bz5H/zH/vvWYFBCI6sNVyPodp9KgysXunqiSIJDRZ2au2Uy8VmJAyAGTZvzcExBixoWEIVEaQFUurs8iRuzcWLZyKivd6F4l99b0bxPRn5+vHm7H5zfFLjLPNBannYvCtUsWWSmhcWIFph2XCQy22yvwsNTUUTFSoiZ0r0+Hr/fHiCAa84uwkKYXbejjAMEhebwotEvQ6s89WTRnKz5T+0PuJUaNCl9GRaIvZp/bRPTVDNWlPgm/77WO78jq0DwgvMvpp5oR50R773mYxnlTcv1awfz+gMM2woKVHRDEzzmX6XOnGBBAdUEmZwGKBQP63M2559psLMi4uWunSQChizAqu5m4AYKI6lo+wqm6XvETtN+rmWdcKgYEc65Nnc71e6l5qjw2oX7KmWX47Ptat/RXdB9CrME2ARi815yqmJKHN2F3kWCwwdVoVjggvEt0b5HOyu8WmeOwi+kLbK2Z2bUv9wUIMfMW5tga5z2NdxwMwAGC+YINYG5kYjPquWNopMLdWTPWEYOpZvwDzv8j8/y3mPkxsr8vMaoFKt8tUkCghuKnLcnFpDs/p5LtkgAC39AYx983bFPN+LlCIM8dv1MMCOZ8wSYlBwT6zHvJXJGx4NzpT5K5yqmcY3kbCjA27UubpXbVWXORkQKvlgDC+bY1uj33DlJneXkePu9RQdf3J8mxPJdbAg1kKH4fGH+v8xNskTfWm2HvHHoqFi8oEgh66eSC9bYkriYOEP4HL+yLBARYMc3xglD89RsoZcz2BQi4cP2P/1yhUZG/3zVCQPBXim4jA36vM8+4UgCO9wgBgQUkedvtCxCQoVhrPlHNfM/Vg0JAYJnXCxCIl8DXBlbFSJA+KnzpPxAbFRmDND32jm9AIKBAa/KtLAIMVrlV2SXhyOnIU5LvKTyBNRN9uBXDNuQu0IAICz/PQqp5GBWnZ91LmvESxyDoXssx1fncMcqY4sa6r9wB4RqbLUB+T7T6FwII1PK/j9GdLyUiM7rpiNQgAARN/wPnfkVjqswDkAEEYrjM/t4D4/kWeQY+Cxc0AVkPQIgZDTaD4oLcxgJqImsDoPq8bL6qhIAgUjVlgMB7WB4mwWmowqA6yAJm5lkx49ecITBqnmipGMfDsaVlBwQkdAsCU88jnxX3n6D0FlYDdqsAbJVPbxWAwUaohjTVX0AO+K5ZsaewBgtYn1fy1GZZYBI1am3hDIcZ1xK1cO/ILnh7hCOGT9tfKn0WG9swJ2tzINeQ/I2erCuLtT3Qe070dDt6AQKx2zB2CodNRwAINH5iPy+iG3+3Yiq6hUZF7KdI/cgZ27wkBIMACAaase+fjdngGJFhrNy7m+bqdhRtKlJAANdzbi5H2jwpaScgwHyL7AT0Xok+AYSsXQE+KQ7MbnjVQMSoR7ey6en0kMOwACowfpcNCHpQKvBV7Qh13fzKn8naurwnolhAoAv7IpsV/xZm8czjFrZmPkIs0NTC30XccbjIec/EI/w1RB/tZIDzGc5qjW421EPpAushfWVF3bwBAdQs3rr+PRpsBJIRGmhFgED7da0NFJgxEFtEBmSeYZivmwHMG6znfBX+fsMbEJg4BF6qWpczqHLMu588G+efzvE2a75uKw0g6CuZ9/Ik9Y4R+0hcqDLEjIc4wzSVpEbD+vltn6gMDg9EdPrhAAxzBAbHNpAKZuNxt+sxfVlY+qw9sqqlI1Ll2QEUTalrq7tIINhCJq2cBU/cACHnomOZqCq3O3AuRnvrFqgFMwXn7cjtOLBIqeFN9rm6nZw9oyAbgmMRM3MtAQR6XRUdr5kiOzgCH40TWCD0QvDgJ3uONyBQENvBPOMnjEv0Zx46+sKsd6IYQEDDsPgZXcTu5JQQznDJ1t3S54CQIfwgKYDAbzHSsDJZ85WQR2wAxhaQ3d9Zy2ADtKs8A41QR9KMuzwCX/yEIW8lOzCGkpab4sbfLFfQ6mwgEWcIJYE8ydw5wFCZXYqEphID4z8Y8MOxLyE7gtDtRHzx7daCaSf6JksoKuOOyuumuIgeI3YYp6uQ9isTXJM7dikzroXceDBFnHoPuq3goUWWoS4zxkaHm1X0MV3qdntTaDVHVShm3GRFP+6zxvB4KJoawTznldx7wNBm63f0ePCS2tXcNbjh8PacRibsfQ9R7zBU2NnX1dmGwWKOtWB+TZooh/ejatIuAmR03VTReI5Mv1O5epTUVtJoSSt76TsioHc7814uZjaehuzv+C6cblTrPevl/+4mlkLHYCJg+vftQAAuxms7O0843COm4ExLTNpTpERgkEWEL2+gETJ7qfuNwPPEuiP7fWwkPJgYCR+nwVTEJnS7LWhmF2d47Q8q8AvgxCZExsRIZ35iKgYboR0AMhHvBMbfbgMCE1OZQWI41FUtQLGU9asW1raTqDz0NedRPl1RX4EBEdn3edaxRE/CQCXea5Fp1xww71h/syKCWYg2IOgBG8Ff0XMgVQ3QmEIDUV4u0j5gkNBMtJyLMtMUBYeICoMZjiDSOmLsidSQJNl/A5l4QNhL1iYbKToYCasct7ZHqoHx66DtZ4CgA6UE4efYiSUVrdxEv9lSIPN3WJbiu4jVvthQY0X9SySMGqP2IBZikFS3JuoeCSaCcdlTqwcbNRmRCvhC0s9h9+9kQCANXoS70ZvgaihEox5xsUAiC5YOIwYxYlW+iykksYj+TcJGbyWWdMyvRwPLQLQFKFI02KilfcRQYPg5wPirM/UMwTi4BEKPr2s2w6eqGVKkaJCrAxgfACXO5wPzvwatCXb/xQgAramhp/uqS6BIkaLBQaAOjAMQmIlhxp4uQkWKFA1o+j9jTdy4Am8jeAAAAABJRU5ErkJggg=='
+  var imageId2 = workbook.addImage({
+    base64: myBase64Image,
+    extension: 'png'
+  })
+  rekapAsetTetapGuna.addImage(imageId2, {
+    tl: { col: 1, row: 0 },
+    ext: { width: 450, height: 100 }
+  })
+  rekapAsetTetapGuna.getCell('A6').value = 'Halaman 1 dari 1'
+  rekapAsetTetapGuna.getCell('A6').border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' }
+  }
+
+  rekapAsetTetapGuna.mergeCells('F1:I2')
+  rekapAsetTetapGuna.getCell('F1').value = 'FORMULIR'
+  rekapAsetTetapGuna.getCell('F1').border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' }
+  }
+  rekapAsetTetapGuna.getCell('F1').font = {
+    bold: true,
+    font: 14
+  }
+  rekapAsetTetapGuna.getCell('F1').alignment = {
+    vertical: 'middle',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.mergeCells('F3:I3')
+
+  rekapAsetTetapGuna.getCell('F3').value = 'No. Dokumen :FM/03/06/001'
+  rekapAsetTetapGuna.mergeCells('F4:I4')
+  rekapAsetTetapGuna.mergeCells('F5:I5')
+
+  rekapAsetTetapGuna.getCell('F4').value = 'No. Revisi  :1'
+  rekapAsetTetapGuna.getCell('F3').border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' },
+    color: { argb: 'FFFFFFFF' }
+  }
+  rekapAsetTetapGuna.getCell('F4').border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' },
+    color: { argb: 'FFFFFFFF' }
+  }
+  rekapAsetTetapGuna.mergeCells('F6:I6')
+  rekapAsetTetapGuna.getCell('F6').value = 'Tanggal Dikeluarkan'
+  rekapAsetTetapGuna.getCell('F6').border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' }
+  }
+  rekapAsetTetapGuna.mergeCells('J1:O6')
+  rekapAsetTetapGuna.getCell('J1').value = 'REKAPITULASI ASET TETAP'
+
+  rekapAsetTetapGuna.getCell('J1').alignment = {
+    vertical: 'middle',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.getCell('J1').font = {
+    bold: true,
+    font: 30
+  }
+  rekapAsetTetapGuna.getCell('J1').border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' }
+  }
+  rekapAsetTetapGuna.getCell('J1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: '808080'
+    }
+  }
+  rekapAsetTetapGuna.mergeCells('A8:O8')
+  rekapAsetTetapGuna.getCell('O8').value =
+    'BPJS KETENAGAKERJAAN RUSUNAWA MUKA KUNING'
+  rekapAsetTetapGuna.getCell('O8').alignment = {
+    vertical: 'center',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.getCell('O8').font = {
+    bold: true,
+    font: 14
+  }
+  rekapAsetTetapGuna.mergeCells('A9:O9')
+  rekapAsetTetapGuna.getCell('O9').value =
+    'REKAPITULASI ASET TETAP YANG MASIH DIGUNAKAN'
+  rekapAsetTetapGuna.getCell('O9').alignment = {
+    vertical: 'center',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.getCell('O9').font = {
+    bold: true,
+    font: 14
+  }
+  rekapAsetTetapGuna.mergeCells('A11:O11')
+  rekapAsetTetapGuna.getCell('O11').value = 'PER JULI 2020'
+  rekapAsetTetapGuna.getCell('O11').alignment = {
+    vertical: 'center',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.getCell('O11').font = {
+    bold: true,
+    font: 14
+  }
+  rekapAsetTetapGuna.mergeCells('A13:A15')
+  rekapAsetTetapGuna.mergeCells('B13:B15')
+  rekapAsetTetapGuna.mergeCells('C13:C15')
+  rekapAsetTetapGuna.mergeCells('D13:D15')
+  rekapAsetTetapGuna.mergeCells('E13:E15')
+  rekapAsetTetapGuna.mergeCells('F13:F15')
+  rekapAsetTetapGuna.mergeCells('G13:I13')
+  rekapAsetTetapGuna.mergeCells('J13:J15')
+  rekapAsetTetapGuna.mergeCells('K13:K15')
+  rekapAsetTetapGuna.mergeCells('L13:O13')
+  rekapAsetTetapGuna.mergeCells('L14:L15')
+  rekapAsetTetapGuna.mergeCells('M14:M15')
+  rekapAsetTetapGuna.mergeCells('N14:N15')
+  rekapAsetTetapGuna.mergeCells('O14:O15')
+
+  var cols = [
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+    'O'
+  ]
+  var cols2 = [
+    '13',
+    '14',
+    '15',
+    '16',
+    '17',
+    '18',
+    '19',
+    '20',
+    '21',
+    '22',
+    '23',
+    '24',
+    '25',
+    '26',
+    '27',
+    '28',
+    '29',
+    '30',
+    '31',
+    '32',
+    '33',
+    '34',
+    '35'
+  ]
+  var result = []
+  for (var i = 0; i < cols2.length; i++) {
+    for (var j = 0; j < cols.length; j++) {
+      var index = (cols[j] + cols2[i]).toString()
+      rekapAsetTetapGuna.getCell(index).border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      }
+      if (parseInt(cols2[i]) < 16) {
+        rekapAsetTetapGuna.getCell(index).font = {
+          name: 'Arial',
+          size: 10,
+          bold: true
+        }
+      }
+    }
+  }
+  rekapAsetTetapGuna.getCell('A14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.getCell('B14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.getCell('C14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('D14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center'
+  }
+  rekapAsetTetapGuna.getCell('E14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('F14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('G13').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('G14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('H14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('I14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('J14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('K14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('L13').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('L14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('M14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('N14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+  rekapAsetTetapGuna.getCell('O14').alignment = {
+    vertical: 'middle',
+    horizontal: 'center',
+    wrapText: true
+  }
+
+  rekapAsetTetapGuna.columns = [
+    {
+      key: 'A',
+      width: 8
+    },
+    {
+      key: 'B',
+      width: 25
+    },
+    {
+      key: 'C',
+      width: 10
+    },
+    {
+      key: 'D',
+      width: 19
+    },
+    {
+      key: 'E',
+      width: 15
+    },
+    {
+      key: 'F',
+      width: 17
+    },
+    {
+      key: 'G',
+      width: 17
+    },
+    {
+      key: 'H',
+      width: 17
+    },
+    {
+      key: 'I',
+      width: 17
+    },
+    {
+      key: 'J',
+      width: 20
+    },
+    {
+      key: 'K',
+      width: 20
+    },
+    {
+      key: 'L',
+      width: 8
+    },
+    {
+      key: 'M',
+      width: 8
+    },
+    {
+      key: 'N',
+      width: 8
+    },
+    {
+      key: 'O',
+      width: 8
+    }
+  ]
+
+  rekapAsetTetapGuna.getCell('A14').value = 'NO'
+  rekapAsetTetapGuna.getCell('B14').value = 'KELOMPOK ASET  TETAP'
+  rekapAsetTetapGuna.getCell('C14').value = 'JUMLAH (UNIT)'
+  rekapAsetTetapGuna.getCell('D14').value = 'NILAI PEROLEHAN'
+  rekapAsetTetapGuna.getCell('E14').value = 'AKUMULASI PENURUNAN NILAI'
+  rekapAsetTetapGuna.getCell('F14').value = 'AKUM.PENY.\nS.D THN LALU'
+  rekapAsetTetapGuna.getCell('G13').value = 'BEBAN PENYUSUTAN TAHUN'
+  rekapAsetTetapGuna.getCell('G14').value = 'S/D BLN LALU'
+  rekapAsetTetapGuna.getCell('H14').value = 'BULAN INI'
+  rekapAsetTetapGuna.getCell('I14').value = 'S/D BLN INI'
+  rekapAsetTetapGuna.getCell('J14').value = 'AKUM.PENY. S/D BULAN INI'
+  rekapAsetTetapGuna.getCell('K14').value = 'NILAI BUKU PER TGL LAPORAN '
+  rekapAsetTetapGuna.getCell('L13').value = 'KONDISI'
+  rekapAsetTetapGuna.getCell('L14').value = 'BAIK'
+  rekapAsetTetapGuna.getCell('M14').value = 'RUSAK RINGAN'
+  rekapAsetTetapGuna.getCell('N14').value = 'RUSAK BERAT'
+  rekapAsetTetapGuna.getCell('O14').value = 'HILANG'
+
+  /* rekapAsetTetapGuna.getCell('A13:15').border = {
+	  top: {style:'thin'},
+	  left: {style:'thin'},
+	  bottom: {style:'thin'},
+	  right: {style:'thin'}
+	}; */
+  /* sheetSyaratKetentuan.mergeCells('A3:B3');
+	sheetSyaratKetentuan.getColumn('A').width = 30;
+	sheetSyaratKetentuan.getColumn('B').width = 80;
+	sheetSyaratKetentuan.getCell('B3').value = 'Langkah Penggunaan Sheet "Data TK Baru"';
+	sheetSyaratKetentuan.getCell('B3').font = {
+		name: 'Arial',
+		size: 12,
+		bold: true
+	};
+	var myBase64Image = "data:image/png;base64,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";
+	var imageId2 = workbook.addImage({
+	  base64: myBase64Image,
+	  extension: 'png',
+	});
+	//sheetSyaratKetentuan.addImage(imageId2, 'A1:B1');
+	sheetSyaratKetentuan.addImage(imageId2, {
+	  tl: { col: 0, row: 7 },
+	  ext: { width: 300, height: 200 }
+	});
+	sheetSyaratKetentuan.getCell('B3').alignment = {
+		vertical: 'center',
+		horizontal: 'center'
+	};
+	sheetSyaratKetentuan.getCell('B3').border = {
+	  top: {style:'thin'},
+	  left: {style:'thin'},
+	  bottom: {style:'thin'},
+	  right: {style:'thin'}
+	};
+	sheetSyaratKetentuan.getCell('B3').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'AED6F1'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A4').value = 'Pengisian Column';
+	sheetSyaratKetentuan.getCell('B4').value = 'Petunjuk';
+	sheetSyaratKetentuan.getCell('A5').value = 'NIK';
+	sheetSyaratKetentuan.getCell('B5').value = 'Berisi nomor identitas dari tenaga kerja. Wajib diisi. Sistem akan melakukan pengecekan dengan data Adminduk jika jenis identitas adalah KTP.';
+	sheetSyaratKetentuan.getCell('A6').value = 'NAMA';
+	sheetSyaratKetentuan.getCell('B6').value = 'Berisi nama depan/nama lengkap dari tenaga kerja. Wajib diisi.';
+	sheetSyaratKetentuan.getCell('A7').value = 'TGL_LAHIR';
+	sheetSyaratKetentuan.getCell('B7').value = 'Berisi tgl_lahir dari tenaga kerja, diisi dengan format dd-mm-yyyy contoh : 31-12-1992. Wajib diisi.';
+	sheetSyaratKetentuan.getCell('A8').value = 'JENIS_IDENTITAS';
+	sheetSyaratKetentuan.getCell('B8').value = 'Berisi jenis identitas dari tenaga kerja. pilihan ada 2 yaitu PASSPORT atau KTP. contoh : PASSPORT';
+	sheetSyaratKetentuan.getCell('A9').value = 'MASA_LAKU_IDENTITAS';
+	sheetSyaratKetentuan.getCell('B9').value = 'Berisi masa berlaku identitas tenaga kerja, diisi dengan format dd-mm-yyyy contoh : 31-12-1992.  Wajib diisi';
+	sheetSyaratKetentuan.getCell('A10').value = 'JENIS_KELAMIN';
+	sheetSyaratKetentuan.getCell('B10').value = 'Berisi jenis kelamin tenaga kerja, diisi dengan inisial L atau P.';
+	sheetSyaratKetentuan.getCell('A11').value = 'SURAT_MENYURAT_KE';
+	sheetSyaratKetentuan.getCell('B11').value = 'Berisi surat menyurat dikirim ke, diisi dengan initial S atau E. Keterangan : S (Alamat) , E (Email) ';
+	sheetSyaratKetentuan.getCell('A12').value = 'STATUS_KAWIN';
+	sheetSyaratKetentuan.getCell('B12').value = 'Berisi status kawin dari tenaga kerja, diisi dengan initial Y atau T. Keterangan : Y (KAWIN) , T (BELUM KAWIN) ';
+	sheetSyaratKetentuan.getCell('A13').value = 'GOLONGAN_DARAH';
+	sheetSyaratKetentuan.getCell('B13').value = 'Berisi golongan darah dari tenaga kerja, diisi dengan golongan A, B, AB, O.';
+	sheetSyaratKetentuan.getCell('A14').value = 'KODE_NEGARA';
+	sheetSyaratKetentuan.getCell('B14').value = 'Berisi kode negara dari tenaga kerja, diisi dengan kode negara contoh : ID , keterangan : ID (INDONESIA).';
+	sheetSyaratKetentuan.mergeCells('A16:B16');
+	sheetSyaratKetentuan.getCell('B16').value = 'Untuk pengisian data tenaga kerja terdapat di sheet data_tk_baru ';
+
+	sheetSyaratKetentuan.getCell('A5').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A6').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A7').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A8').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A9').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A10').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A11').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A12').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A13').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};
+	sheetSyaratKetentuan.getCell('A14').fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: {
+	  argb: 'ABEBC6'
+	}
+	};*/
+  var sheetUpah = workbook.addWorksheet('data_tk_baru', {
+    properties: {
+      tabColor: {
+        argb: 'FF00FF00'
+      }
+    }
+  })
+  sheetUpah.columns = [
+    {
+      header: 'NO_PEGAWAI',
+      key: 'NO_PEGAWAI',
+      width: 10
+    },
+    {
+      header: 'NAMA_LENGKAP',
+      key: 'NAMA_LENGKAP',
+      width: 25
+    },
+    {
+      header: 'GELAR',
+      key: 'GELAR',
+      width: 5
+    },
+    {
+      header: 'TELEPON_AREA_RUMAH',
+      key: 'TELEPON_AREA_RUMAH',
+      width: 10
+    },
+    {
+      header: 'TELEPON_RUMAH',
+      key: 'TELEPON_RUMAH',
+      width: 10
+    },
+    {
+      header: 'TELEPON_AREA_KANTOR',
+      key: 'TELEPON_AREA_KANTOR',
+      width: 10
+    },
+    {
+      header: 'TELEPON_KANTOR',
+      key: 'TELEPON_KANTOR',
+      width: 10
+    },
+    {
+      header: 'TELEPON_EXT_KANTOR',
+      key: 'TELEPON_EXT_KANTOR',
+      width: 10
+    },
+    {
+      header: 'HP',
+      key: 'HP',
+      width: 10
+    },
+    {
+      header: 'EMAIL',
+      key: 'EMAIL',
+      width: 10
+    },
+    {
+      header: 'TEMPAT_LAHIR',
+      key: 'TEMPAT_LAHIR',
+      width: 10
+    },
+    {
+      header: 'TANGGAL_LAHIR',
+      key: 'TANGGAL_LAHIR',
+      width: 10
+    },
+    {
+      header: 'NAMA_IBU_KANDUNG',
+      key: 'NAMA_IBU_KANDUNG',
+      width: 10
+    },
+    {
+      header: 'JENIS_IDENTITAS',
+      key: 'JENIS_IDENTITAS',
+      width: 10
+    },
+    {
+      header: 'NOMOR_IDENTITAS',
+      key: 'NOMOR_IDENTITAS',
+      width: 10
+    },
+    {
+      header: 'MASA_LAKU_IDENTITAS',
+      key: 'MASA_LAKU_IDENTITAS',
+      width: 10
+    },
+    {
+      header: 'JENIS_KELAMIN',
+      key: 'JENIS_KELAMIN',
+      width: 10
+    },
+    {
+      header: 'SURAT_MENYURAT_KE',
+      key: 'SURAT_MENYURAT_KE',
+      width: 10
+    },
+    {
+      header: 'STATUS_KAWIN',
+      key: 'STATUS_KAWIN',
+      width: 10
+    },
+    {
+      header: 'GOLONGAN_DARAH',
+      key: 'GOLONGAN_DARAH',
+      width: 10
+    },
+    {
+      header: 'NAMA_BANK',
+      key: 'NAMA_BANK',
+      width: 10
+    },
+    {
+      header: 'CABANG_BANK',
+      key: 'CABANG_BANK',
+      width: 10
+    },
+    {
+      header: 'NO_REKENING',
+      key: 'NO_REKENING',
+      width: 10
+    },
+    {
+      header: 'NAMA_REKENING',
+      key: 'NAMA_REKENING',
+      width: 10
+    },
+    {
+      header: 'NPWP',
+      key: 'NPWP',
+      width: 10
+    },
+    {
+      header: 'UPAH',
+      key: 'UPAH',
+      width: 10
+    },
+    {
+      header: 'ALAMAT',
+      key: 'ALAMAT',
+      width: 10
+    },
+    {
+      header: 'KODE_POS',
+      key: 'KODE_POS',
+      width: 10
+    }
+  ]
+
+  sheetUpah.getCell('B1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('K1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('L1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('M1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('N1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('O1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('P1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('Q1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('R1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('S1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('T1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('Z1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('AA1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  sheetUpah.getCell('AB1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: {
+      argb: 'ffff00'
+    }
+  }
+  // return workbook.model
+  // res.setHeader('Content-Type', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  // res.setHeader("Content-Disposition", "attachment; filename= template_tk_.xlsx");
+  return workbook
+  /* .then(function () {
+		res.end();
+	}); */
+  /* return workbook.xlsx.write(res).then(function () {
+		res.end();
+	}); */
+
+  // console.log(workbook)
+  // workbook.xlsx.writeBuffer()
+  /* var to_json = JSON.stringify(workbook.model)
+	return to_json
+ */
+}

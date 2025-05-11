@@ -1,0 +1,64 @@
+const apiReqNew = require('./api-caller-new')
+
+const reqCtrl = {
+  getContohPagingUnit: {
+    params: (req) => {
+      console.log('paramnya', req.query)
+      const page = req.query.page ? req.query.page : 1
+      const itemsPerPage = req.query.itemsPerPage ? req.query.itemsPerPage : 10
+      const sortBy = req.query.sortBy ? (req.query.sortBy.length > 0 ? req.query.sortBy[0] : null) : 0
+      const sortDesc = req.query.sortDesc ? (req.query.sortDesc.length > 0 ? req.query.sortDesc[0] : false) : false
+      return {
+        p_rusun: req.query.p_rusun ? req.query.p_rusun.trim() : '',
+        p_lantai: req.query.p_lantai ? Number(req.query.p_lantai) : 0,
+        p_jenis: req.query.p_jenis ? req.query.p_jenis.trim() : '',
+        p_blok: req.query.p_blok ? req.query.p_blok.trim() : '',
+        p_id: req.query.p_id ? Number(req.query.p_id) : 0,
+        p_aktif: req.query.p_aktif ? req.query.p_aktif : null,
+        page: page,
+        itemsPerPage: itemsPerPage,
+        sortBy: sortBy,
+        sortDesc: sortDesc
+      }
+    },
+    rules: {
+      p_rusun: {
+        presence: true,
+        length: {
+          minimum: 1,
+          maximum: 5,
+          message: '^Kode Rusun maximum 5 characters'
+        }
+      },
+      p_jenis: {
+        length: {
+          maximum: 5,
+          message: '^Kode Jenis Unit maximum 5 characters'
+        }
+      },
+      p_blok: {
+        length: {
+          maximum: 5,
+          message: '^Kode Blok maximum 5 characters'
+        }
+      },
+      p_lantai: {
+        type: {
+          type: 'integer',
+          message: '^ID Lantai harus angka'
+        }
+      },
+      p_id: {
+        type: {
+          type: 'integer',
+          message: '^ID Unit harus angka'
+        }
+      }
+    },
+    request: 'getContohPagingUnit'
+  }
+}
+
+exports.methodGet = {
+  'contoh-paging/unit': (req, res) => apiReqNew.getData(req, res, reqCtrl.getContohPagingUnit)
+}
